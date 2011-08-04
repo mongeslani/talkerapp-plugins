@@ -1,0 +1,44 @@
+plugin.onMessageInsertion = function(event){
+	var lastIns = Talker.getLastInsertion();
+	var containsRandom = lastIns.is(':contains($random)');
+	if (!containsRandom) return;	
+	var text = lastIns.text();
+	var qty = $.trim(text.split('$random')[1]);
+	if (qty.length == 0) qty = 1;
+	if (isNaN(qty) || qty <= 0) return;
+	var users = Talker.getRoomUsernames();
+	if (users.length < qty) qty = users.length; 
+	var results = [];
+	while (qty > 0){
+		$.shuffle(users);
+		results.push(users.pop())
+		qty--;
+	}
+	var message = results.join(', ');
+	lastIns.append('<br />' + '[' + message + ']');
+};
+
+/*
+ * jQuery shuffle
+ *
+ * Copyright (c) 2008 Ca-Phun Ung <caphun at yelotofu dot com>
+ * Dual licensed under the MIT (MIT-LICENSE.txt)
+ * and GPL (GPL-LICENSE.txt) licenses.
+ *
+ * http://yelotofu.com/labs/jquery/snippets/shuffle/
+ *
+ * Shuffles an array or the children of a element container.
+ * This uses the Fisher-Yates shuffle algorithm <http://jsfromhell.com/array/shuffle [v1.0]>
+ */ 
+(function($){
+	$.fn.shuffle = function(){
+		return this.each(function(){
+			var items = $(this).children().clone(true);
+			return (items.length) ? $(this).html($.shuffle(items)) : this;
+		});
+	}
+	$.shuffle = function(arr){
+		for(var j, x, i = arr.length; i; j = parseInt(Math.random() * i), x = arr[--i], arr[i] = arr[j], arr[j] = x);
+		return arr;
+	}
+})(jQuery);

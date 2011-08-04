@@ -1,0 +1,22 @@
+var apiKey = ''; // Your apiKey
+var maxResults = 1;
+var url = 'http://api.search.live.net/json.aspx?';
+
+plugin.onMessageInsertion = function(event){
+	var lastIns = Talker.getLastInsertion();
+	var containsBing = lastIns.is(':contains($bing )');
+	if (!containsBing) return;	
+	var text = lastIns.text();
+	var query = $.trim(text.split('$bing')[1]);
+	if (!query || query.indexOf('Bing Search: ') > -1) return;
+	$.ajax({
+		url: url + 'AppId=' + apiKey + '&Query=' + escape(query) + '&Sources=Web' + '&Web.Count=' + maxResults + '&Web.Offset=0' + '&JsonType=callback' + '&JsonCallback=?',
+		dataType: 'jsonp',
+		success: function(response){
+			if (!response || !response.SearchResponse || !response.SearchResponse.Web || !response.SearchResponse.Web.Results || !response.SearchResponse.Web.Results[0]) return;
+			var result = response.SearchResponse.Web.Results[0];
+			var message = 'Bing Search: <a href="' + result.Url + '" target="_blank" title="' + result.Description + '">' + result.Title + '</a>';
+			lastIns.append('<br />' + message);
+		}
+	});
+};

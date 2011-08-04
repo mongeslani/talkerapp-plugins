@@ -1,0 +1,22 @@
+var apiKey = ''; // Your API Key
+var account = ''; // Your bit.ly account username
+var url = 'http://api.bit.ly/v3/shorten';
+
+plugin.onMessageInsertion = function(event){
+	var lastIns = Talker.getLastInsertion();
+	var containsBitly = lastIns.is(':contains($bitly )');
+	if (!containsBitly) return;	
+	var text = lastIns.text();
+	var uri = $.trim(text.split('$bitly')[1]);
+	if (!uri) return;
+	$.ajax({
+		url: url + '?login=' + account + '&apiKey=' + apiKey + '&uri=' + uri + '&format=json&callback=?',
+		dataType: 'jsonp',
+		success: function(response){
+			if (!response || response.status_code != 200 || !response.data || !response.data.url) return;
+			var message = '<a href="' + response.data.url + '" target="_blank" title="' + uri + '">' + response.data.url + '</a>';
+			var strippedText = lastIns.html().split('$bitly')[0];
+			lastIns.html(strippedText + message);
+		}
+	});
+};

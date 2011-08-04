@@ -1,0 +1,16 @@
+plugin.onMessageInsertion = function(event) {
+	var lastIns = Talker.getLastInsertion();
+	var containsAll = lastIns.is(':contains(@all )');
+	if (!containsAll) return;	
+	var text = lastIns.text();
+	var message = $.trim(text.split('@all')[1]);
+	if (!message) return;
+	event.content = message.length <= 140 ? message : $.trim(message).substr(0, 140) + '...';
+	Talker.notify(event);
+
+	var blocks = lastIns.parent('blockquote');
+	blocks.css({
+		'-moz-box-shadow': '0 0 10px yellow',
+		'-webkit-box-shadow': '0 0 10px yellow'
+	});
+};
